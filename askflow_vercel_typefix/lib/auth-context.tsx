@@ -60,20 +60,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
 
         // Check student table
-        const { data: studentData } = (await supabase
+        const { data: studentData } = await supabase
           .from('students')
           .select('*')
           .eq('id', user.id)
-          .single()) as unknown as {
-            data: {
-              id: string;
-              name: string;
-              roll_number: string;
-              email: string;
-              year: number;
-              term: number;
-            } | null;
-          };
+          .single();
 
         if (studentData) {
           const profile: StudentProfile = {
@@ -91,23 +82,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           localStorage.setItem('askflow_student', JSON.stringify(profile));
         } else {
           // Check teacher table
-          const { data: teacherData } = (await supabase
+          const { data: teacherData } = await supabase
             .from('teachers')
             .select('*, courses(*)')
             .eq('id', user.id)
-            .single()) as unknown as {
-              data: {
-                id: string;
-                name: string;
-                email: string;
-                teacher_id: string;
-                course_id: string;
-                courses: {
-                  course_code: string;
-                  course_name: string;
-                } | null;
-              } | null;
-            };
+            .single();
 
           if (teacherData) {
             const course = teacherData.courses;
@@ -215,10 +194,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .select('*')
         .eq('id', userId)
         .single();
-
-      if (!data.isSignUp && !studentData) {
-        return { error: 'No student account found for this email. Please sign up first.' };
-      }
 
       const profile: StudentProfile = studentData
         ? {
@@ -345,10 +320,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .select('*, courses(*)')
         .eq('id', userId)
         .single();
-
-      if (!data.isSignUp && !teacherData) {
-        return { error: 'No teacher account found for this email. Please sign up first.' };
-      }
 
       let profile: TeacherProfile;
       if (teacherData) {
